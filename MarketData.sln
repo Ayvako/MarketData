@@ -13,6 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketData.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketData.Api", "src\MarketData.Api\MarketData.Api.csproj", "{FAB42CE9-09A3-4C60-8A3D-DA9C955614F8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,5 +85,8 @@ Global
 		{8C7559F4-1C06-43BB-B513-BC38902FA69C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{3B250511-2DCE-4CA5-9C34-DCD32E8C0DA1} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{FAB42CE9-09A3-4C60-8A3D-DA9C955614F8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {202858C2-20EB-4B94-B8A4-CDCAC5D4FA7E}
 	EndGlobalSection
 EndGlobal

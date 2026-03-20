@@ -1,0 +1,20 @@
+<Project>
+	<PropertyGroup>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+		<NoWarn>$(NoWarn);CA1515</NoWarn>
+		<NoWarn>$(NoWarn);CA2227</NoWarn>
+		<NoWarn>$(NoWarn);CA1002</NoWarn>
+		<NoWarn>$(NoWarn);CA2234</NoWarn>
+		<NoWarn>$(NoWarn);NETSDK1138</NoWarn>
+		<NoWarn>$(NoWarn);SA1009</NoWarn>
+		<NoWarn>$(NoWarn);SA1000</NoWarn>
+		<NoWarn>$(NoWarn);SA1600</NoWarn>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		<NoWarn>$(NoWarn);SA1633</NoWarn>
+		<NoWarn>$(NoWarn);IDE0079</NoWarn>
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
+</Project>
