@@ -1,3 +1,4 @@
+using MarketData.Api.Workers;
 using MarketData.Application.Interfaces;
 using MarketData.Infrastructure.Persistence;
 using MarketData.Infrastructure.Services;
@@ -17,6 +18,10 @@ builder.Services.AddTransient<FintachartsAuthHandler>();
 builder.Services.AddHttpClient<IFintachartsRestClient, FintachartsRestClient>()
     .AddHttpMessageHandler<FintachartsAuthHandler>();
 
+builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddHostedService<AssetSyncWorker>();
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -26,4 +31,5 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync().ConfigureAwait(false);
 }
 
+app.MapControllers();
 await app.RunAsync().ConfigureAwait(false);
