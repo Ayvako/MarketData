@@ -16,7 +16,11 @@ public partial class FintachartsWebSocketClient(IConfiguration config, IFintacha
 
     private readonly ILogger<FintachartsWebSocketClient> logger = logger;
 
+    private TaskCompletionSource connectionTcs = new();
+
     private ClientWebSocket? socket;
+
+    public Task Ready => this.connectionTcs.Task;
 
     public async Task ConnectAndListen(Action<WsPriceUpdateMessage> onUpdate, CancellationToken ct)
     {
@@ -26,6 +30,7 @@ public partial class FintachartsWebSocketClient(IConfiguration config, IFintacha
         {
             try
             {
+                this.connectionTcs = new TaskCompletionSource();
                 this.socket?.Dispose();
                 this.socket = new ClientWebSocket();
 
@@ -34,6 +39,7 @@ public partial class FintachartsWebSocketClient(IConfiguration config, IFintacha
 
                 await this.socket.ConnectAsync(uri, ct).ConfigureAwait(false);
                 LogConnected(this.logger);
+                this.connectionTcs.SetResult();
 
                 var buffer = new byte[1024 * 4];
                 while (this.socket.State == WebSocketState.Open)

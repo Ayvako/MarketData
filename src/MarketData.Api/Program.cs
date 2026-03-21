@@ -12,11 +12,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddHttpClient<IFintachartsAuthService, FintachartsAuthService>();
-
+builder.Services.AddSingleton<IFintachartsAuthService>(sp =>
+{
+    var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpClient = clientFactory.CreateClient(nameof(IFintachartsAuthService));
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new FintachartsAuthService(httpClient, config);
+});
 builder.Services.AddTransient<FintachartsAuthHandler>();
 builder.Services.AddSingleton<FintachartsWebSocketClient>();
 builder.Services.AddHostedService<PriceUpdateWorker>();
-
 builder.Services.AddHttpClient<IFintachartsRestClient, FintachartsRestClient>()
     .AddHttpMessageHandler<FintachartsAuthHandler>();
 

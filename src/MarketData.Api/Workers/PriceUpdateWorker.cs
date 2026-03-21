@@ -18,25 +18,26 @@ public class PriceUpdateWorker(IServiceProvider serviceProvider, FintachartsWebS
     {
         _ = this.wsClient.ConnectAndListen(
             async update =>
-        {
-            using var scope = this.serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            var asset = await db.Assets.FirstOrDefaultAsync(a => a.ExternalId == update.InstrumentId).ConfigureAwait(false);
-            if (asset != null)
             {
-                ArgumentNullException.ThrowIfNull(update.Last);
-                asset.LastPrice = update.Last.Price;
-                asset.LastUpdated = update.Last.Timestamp;
-                await db.SaveChangesAsync().ConfigureAwait(false);
-            }
-        },
+                using var scope = this.serviceProvider.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                var asset = await db.Assets.FirstOrDefaultAsync(a => a.ExternalId == update.InstrumentId).ConfigureAwait(false);
+                if (asset != null)
+                {
+                    ArgumentNullException.ThrowIfNull(update.Last);
+                    asset.LastPrice = update.Last.Price;
+                    asset.LastUpdated = update.Last.Timestamp;
+                    await db.SaveChangesAsync().ConfigureAwait(false);
+                }
+            },
             stoppingToken);
 
-        await Task.Delay(5000, stoppingToken).ConfigureAwait(false);
+        await this.wsClient.Ready.WaitAsync(stoppingToken).ConfigureAwait(false);
+
         using var scope = this.serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var ids = await db.Assets.Select(a => a.ExternalId).ToListAsync(cancellationToken: stoppingToken).ConfigureAwait(false);
+        var ids = await db.Assets.Select(a => a.ExternalId).ToListAsync(stoppingToken).ConfigureAwait(false);
 
         foreach (var id in ids)
         {

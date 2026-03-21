@@ -32,7 +32,7 @@ public class AssetService(ApplicationDbContext context, IFintachartsRestClient f
             provider: "oanda",
             ct: ct).ConfigureAwait(false);
 
-        return new AssetPriceResponse
+        var response = new AssetPriceResponse
         {
             AssetId = asset.Id,
             Symbol = asset.Symbol,
@@ -40,6 +40,15 @@ public class AssetService(ApplicationDbContext context, IFintachartsRestClient f
             LastUpdated = asset.LastUpdated,
             History = history,
         };
+        if (response.LastPrice == null && response.History != null && response.History.Count == 0)
+        {
+            var latestCandle = response.History[0];
+
+            response.LastPrice = latestCandle.Close;
+            response.LastUpdated = latestCandle.Timestamp;
+        }
+
+        return response;
     }
 
     public async Task SyncAssetsAsync(CancellationToken ct = default)
@@ -48,11 +57,15 @@ public class AssetService(ApplicationDbContext context, IFintachartsRestClient f
 
         foreach (var instrument in remoteInstruments)
         {
-            var exists = await this.context.Assets.AnyAsync(a => a.ExternalId == instrument.Id, ct).ConfigureAwait(false);
+            var asset = await this.context.Assets
+                .FirstOrDefaultAsync(a => a.ExternalId == instrument.Id, ct)
+                .ConfigureAwait(false);
 
-            if (!exists)
+            bool isNew = false;
+            if (asset == null)
             {
-                this.context.Assets.Add(new Asset
+                isNew = true;
+                asset = new Asset
                 {
                     Id = Guid.NewGuid(),
                     ExternalId = instrument.Id,
@@ -60,7 +73,27 @@ public class AssetService(ApplicationDbContext context, IFintachartsRestClient f
                     Name = instrument.Description,
                     AssetKind = instrument.Kind,
                     Exchange = instrument.Exchange,
-                });
+                };
+            }
+
+            var bars = await this.fintaClient.GetHistoricalBarsAsync(
+                instrument.Id,
+                "oanda",
+                1,
+                "minute",
+                1,
+                ct).ConfigureAwait(false);
+
+            var lastBar = bars?.FirstOrDefault();
+            if (lastBar != null)
+            {
+                asset.LastPrice = lastBar.Close;
+                asset.LastUpdated = lastBar.Timestamp;
+            }
+
+            if (isNew)
+            {
+                this.context.Assets.Add(asset);
             }
         }
 
