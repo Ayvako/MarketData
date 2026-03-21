@@ -1,10 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
+﻿#nullable disable
 
 namespace MarketData.Infrastructure.Persistence.Migrations
 {
+    using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
