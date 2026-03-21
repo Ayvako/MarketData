@@ -15,6 +15,7 @@
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
 		<NoWarn>$(NoWarn);SA1633</NoWarn>
 		<NoWarn>$(NoWarn);IDE0079</NoWarn>
+		<NoWarn>$(NoWarn);SA1601</NoWarn>
 		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
 	</PropertyGroup>
 </Project>

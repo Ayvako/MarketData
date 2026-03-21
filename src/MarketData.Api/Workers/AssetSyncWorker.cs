@@ -2,7 +2,7 @@
 
 using MarketData.Application.Interfaces;
 
-public class AssetSyncWorker(IServiceProvider serviceProvider, ILogger<AssetSyncWorker> logger) : BackgroundService
+public partial class AssetSyncWorker(IServiceProvider serviceProvider, ILogger<AssetSyncWorker> logger) : BackgroundService
 {
     private readonly IServiceProvider serviceProvider = serviceProvider;
 
@@ -10,7 +10,7 @@ public class AssetSyncWorker(IServiceProvider serviceProvider, ILogger<AssetSync
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this.logger.LogInformation("Asset synchronization started...");
+        LogSyncStarted(this.logger);
 
         using var scope = this.serviceProvider.CreateScope();
         var assetService = scope.ServiceProvider.GetRequiredService<IAssetService>();
@@ -18,21 +18,30 @@ public class AssetSyncWorker(IServiceProvider serviceProvider, ILogger<AssetSync
         try
         {
             await assetService.SyncAssetsAsync(stoppingToken).ConfigureAwait(false);
-            this.logger.LogInformation("Asset synchronization completed successfully.");
+            LogSyncCompleted(this.logger);
         }
         catch (OperationCanceledException)
         {
-            this.logger.LogWarning("Asset synchronization was canceled.");
+            LogSyncCanceled(this.logger);
         }
         catch (HttpRequestException ex)
         {
-            this.logger.LogError(ex, "Network error during asset synchronization.");
-        }
-        catch (Exception ex)
-        {
-            var message = "Fatal error occurred while syncing assets during background execution.";
-            this.logger.LogCritical(ex, message);
-            throw new InvalidOperationException(message, ex);
+            LogNetworkError(this.logger, ex);
         }
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Asset synchronization started...")]
+    static partial void LogSyncStarted(ILogger logger);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Asset synchronization completed successfully.")]
+    static partial void LogSyncCompleted(ILogger logger);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Asset synchronization was canceled.")]
+    static partial void LogSyncCanceled(ILogger logger);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "Network error during asset synchronization.")]
+    static partial void LogNetworkError(ILogger logger, Exception ex);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Critical, Message = "Fatal error occurred while syncing assets during background execution.")]
+    static partial void LogFatalError(ILogger logger, Exception ex);
 }
