@@ -26,7 +26,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Database=marketdata_db;Username=user;Password=password
       - Fintacharts__ClientId=app-cli
-      - Fintacharts__ClientSecret=ВАШ_CLIENT_SECRET_ИЗ_POSTMAN
     depends_on:
       - db
 
