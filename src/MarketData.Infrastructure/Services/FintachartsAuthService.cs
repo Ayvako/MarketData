@@ -1,19 +1,16 @@
 ﻿namespace MarketData.Infrastructure.Services;
 
+using System.Net.Http;
 using System.Net.Http.Json;
 using MarketData.Application.Interfaces;
 using MarketData.Application.Models;
 using Microsoft.Extensions.Configuration;
 
-public class FintachartsAuthService(HttpClient httpClient, IConfiguration configuration) : IFintachartsAuthService, IDisposable
+public class FintachartsAuthService(IHttpClientFactory httpClientFactory, IConfiguration configuration) : IFintachartsAuthService, IDisposable
 {
     private readonly SemaphoreSlim semaphore = new(1, 1);
 
-#pragma warning disable CA2213 // Следует высвобождать высвобождаемые поля
-
-    private readonly HttpClient httpClient = httpClient;
-
-#pragma warning restore CA2213 // Следует высвобождать высвобождаемые поля
+    private readonly IHttpClientFactory httpClientFactory = httpClientFactory;
 
     private readonly IConfiguration configuration = configuration;
 
@@ -38,6 +35,7 @@ public class FintachartsAuthService(HttpClient httpClient, IConfiguration config
                 return this.cachedToken;
             }
 
+            var httpClient = this.httpClientFactory.CreateClient("FintachartsAuth");
             var tokenUrl = this.configuration["Fintacharts:TokenUrl"]!;
             var requestData = new Dictionary<string, string>
             {
@@ -48,7 +46,7 @@ public class FintachartsAuthService(HttpClient httpClient, IConfiguration config
             };
 
             using var content = new FormUrlEncodedContent(requestData);
-            var response = await this.httpClient
+            var response = await httpClient
                 .PostAsync(tokenUrl, content, cancellationToken)
                 .ConfigureAwait(false);
 

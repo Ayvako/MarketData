@@ -11,14 +11,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-builder.Services.AddHttpClient<IFintachartsAuthService, FintachartsAuthService>();
-builder.Services.AddSingleton<IFintachartsAuthService>(sp =>
+builder.Services.AddSingleton<IFintachartsAuthService, FintachartsAuthService>();
+
+builder.Services.AddHttpClient("FintachartsAuth", client =>
 {
-    var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
-    var httpClient = clientFactory.CreateClient(nameof(IFintachartsAuthService));
-    var config = sp.GetRequiredService<IConfiguration>();
-    return new FintachartsAuthService(httpClient, config);
+    client.BaseAddress = new Uri(builder.Configuration["Fintacharts:BaseUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
+
 builder.Services.AddTransient<FintachartsAuthHandler>();
 builder.Services.AddSingleton<FintachartsWebSocketClient>();
 builder.Services.AddHostedService<PriceUpdateWorker>();
